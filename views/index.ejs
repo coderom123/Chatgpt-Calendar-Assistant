@@ -1,0 +1,173 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Voice ChatGPT Assistant</title>
+  <link rel="stylesheet" href="/style2.css">
+</head>
+<!-- <body>
+  <div class="container">
+    <h1>🎤 ChatGPT  Assistant</h1>
+    <div class="chat-container">
+      <div id="chat-box" class="chat-box"></div>
+
+      <textarea id="prompt" rows="4" placeholder="Type or speak your prompt..."></textarea>
+      <div class="buttons">
+        <button onclick="sendPrompt()">Send</button>
+        <button onclick="startVoiceInput()">🎙️ Speak</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    async function sendPrompt() {
+      const prompt = document.getElementById('prompt').value.trim();
+      const chatBox = document.getElementById('chat-box');
+      if (!prompt) return;
+
+      chatBox.innerHTML += `<div class="user-message"><strong>You:</strong> ${prompt}</div>`;
+      document.getElementById('prompt').value = '';
+
+      try {
+        const response = await fetch('/assistant', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ message: prompt })
+        });
+
+        const data = await response.json();
+        if (data.reply) {
+          chatBox.innerHTML += `<div class="assistant-message"><strong>Assistant:</strong> ${data.reply}</div>`;
+          // speakOutLoud(data.reply);
+        } else {
+          chatBox.innerHTML += `<div class="assistant-message error"><strong>Error:</strong> ${data.error}</div>`;
+        }
+      } catch (error) {
+        chatBox.innerHTML += `<div class="assistant-message error"><strong>Error:</strong> Failed to get response.</div>`;
+      }
+    }
+
+    function startVoiceInput() {
+      if (!('webkitSpeechRecognition' in window)) {
+        alert("Voice input not supported in this browser");
+        return;
+      }
+
+      const recognition = new webkitSpeechRecognition(); 
+      recognition.lang = 'en-US';
+      recognition.interimResults = false;
+      recognition.maxAlternatives = 1;
+
+      recognition.start();
+
+      recognition.onresult = function(event) {
+        const transcript = event.results[0][0].transcript;
+        document.getElementById('prompt').value = transcript;
+        sendPrompt(); // auto-send after speech
+      };
+
+      recognition.onerror = function(event) {
+        console.error("Voice input error:", event.error);
+        alert("Voice input failed: " + event.error);
+      };
+    }
+
+    function speakOutLoud(text) {
+      if (!'speechSynthesis' in window) return;
+
+      const utter = new SpeechSynthesisUtterance(text);
+      utter.lang = 'en-US';
+      utter.rate = 1;
+      utter.pitch = 1;
+      speechSynthesis.speak(utter);
+    }
+  </script>
+</body> -->
+<body>
+  <div class="container">
+    <h1>VantageIQ Technologies Calendar Assistant</h1> 
+    <div id="chat-box" class="chat-box"></div>
+
+    <div class="prompt-wrapper">
+      <input id="prompt" type="text" placeholder="Message ChatGPT..." onkeypress="handleKeyPress(event)" />
+      <button onclick="startVoiceInput()">🎤</button>
+      <button onclick="sendPrompt()">➡️</button>
+    </div>
+  </div>
+
+  <script>
+    async function sendPrompt() {
+      const promptInput = document.getElementById('prompt');
+      const prompt = promptInput.value.trim();
+      const chatBox = document.getElementById('chat-box');
+      if (!prompt) return;
+
+      chatBox.innerHTML += `<div class="user-message"><strong>You:</strong> ${prompt}</div>`;
+      promptInput.value = '';
+
+      try {
+        const response = await fetch('/assistant', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ message: prompt })
+        });
+
+        const data = await response.json();
+
+        if (data.reply) {
+          chatBox.innerHTML += `
+            <div class="assistant-message"> <strong>Assistant:</strong> ${data.reply.replace(/\n/g, "<br>")} ${data.speakable ? `<button onclick="speakOutLoud(\`${data.reply.replace(/`/g, '\\`')}\`)">🔊 Speak</button>` : ''} </div>
+          `;
+        } else {
+          chatBox.innerHTML += `<div class="assistant-message"><strong>Error:</strong> ${data.error}</div>`;
+        }
+
+        chatBox.scrollTop = chatBox.scrollHeight;
+      } catch (error) {
+        chatBox.innerHTML += `<div class="assistant-message"><strong>Error:</strong> Failed to get response.</div>`;
+      }
+    }
+
+    function handleKeyPress(event) {
+      if (event.key === 'Enter') {
+        event.preventDefault();
+        sendPrompt();
+      }
+    }
+
+    function startVoiceInput() {
+      if (!('webkitSpeechRecognition' in window)) {
+        alert("Voice input not supported in this browser");
+        return;
+      }
+
+      const recognition = new webkitSpeechRecognition();
+      recognition.lang = 'en-US';
+      recognition.interimResults = false;
+      recognition.maxAlternatives = 1;
+
+      recognition.start();
+
+      recognition.onresult = function(event) {
+        const transcript = event.results[0][0].transcript;
+        document.getElementById('prompt').value = transcript;
+        sendPrompt();
+      };
+
+      recognition.onerror = function(event) {
+        alert("Voice input failed: " + event.error);
+      };
+    }
+
+    function speakOutLoud(text) {
+      const utter = new SpeechSynthesisUtterance(text);
+      utter.lang = 'en-US';
+      utter.rate = 1;
+      utter.pitch = 1;
+      speechSynthesis.speak(utter);
+    }
+  </script>
+</body>
+</html>
+
